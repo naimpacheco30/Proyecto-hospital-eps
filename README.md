@@ -1,2 +1,2 @@
 # Proyecto-hospital-eps
-Integrantes: Sebaastian Perez, Samuel Dominguez y Naim Pacheco 
+Integrantes: Sebastian Perez, Samuel Dominguez y Naim Pacheco 
