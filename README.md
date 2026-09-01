@@ -1,9 +1,10 @@
 Sistema de Gestión de Citas - EPS Vida Sana
-Sistema integral y modular para la administración, registro, agendamiento y control de citas médicas multidisciplinares para usuarios de la EPS Vida Sana[cite: 1, 2].
+Sistema integral y modular para la administración, registro, agendamiento y control de citas médicas multidisciplinares para usuarios de la EPS Vida Sana.
 
 🌐 Enlaces del Proyecto
 Repositorio en GitHub: https://github.com/naimpacheco30/Proyecto-hospital-eps
 Despliegue en Producción (Netlify): https://hospital-eps.netlify.app/
+
 👥 Integrantes del Equipo
 Integrantes: Sebastian Perez, Naim Pacheco y Samuel Dominguez
 
