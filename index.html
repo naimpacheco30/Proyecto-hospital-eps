@@ -1,24 +1,434 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EPS Vida Sana</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #F0F4FF; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background-color: #FFFFFF; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; width: 350px; }
-        h1 { color: #2E4883; margin-bottom: 10px; }
-        p { color: #6B7280; margin-bottom: 30px; }
-        button { background-color: #2E4883; color: white; border: none; padding: 12px 20px; margin: 10px 0; width: 100%; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background 0.3s; }
-        button:hover { background-color: #1F3864; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EPS Vida Sana</title>
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { background-color: #F0F4FF; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .card { background: #FFFFFF; padding: 24px; border-radius: 8px; border: 1px solid #D1D5DB; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); width: 100%; max-width: 540px; }
+    .header { background: #2E4883; color: white; margin: -24px -24px 20px -24px; padding: 16px; border-radius: 8px 8px 0 0; text-align: center; }
+    h2, h3, h4 { margin: 0; }
+    .subtitle { color: #6B7280; font-size: 14px; margin-bottom: 20px; text-align: center; }
+    .form-group { margin-bottom: 12px; text-align: left; }
+    .form-row { display: flex; gap: 12px; }
+    .form-row .form-group { flex: 1; }
+    label { display: block; font-size: 13px; color: #6B7280; margin-bottom: 4px; }
+    input, select { width: 100%; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 4px; font-size: 14px; background: #F9FAFB; }
+    input:focus, select:focus { outline: none; border-color: #4F78C8; background: white; }
+    button { width: 100%; padding: 10px; border: none; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 8px; }
+    .btn-primary { background: #2E4883; color: white; }
+    .btn-primary:hover { background: #1F3864; }
+    .btn-secondary { background: #6B7280; color: white; }
+    .btn-accent { background: #4F78C8; color: white; }
+    .btn-danger { background: #DC2626; color: white; }
+    .btn-warning { background: #B45309; color: white; }
+    .btn-teal { background: #065F46; color: white; }
+    .btn-purple { background: #7C3AED; color: white; }
+    .btn-purple:hover { background: #6D28D9; }
+    .btn-group { display: flex; gap: 8px; margin-top: 14px; }
+    .hidden { display: none; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+    th, td { border: 1px solid #D1D5DB; padding: 8px; text-align: left; }
+    th { background: #F9FAFB; color: #1F2937; }
+    .list-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #D1D5DB; padding: 10px 0; font-size: 13px; }
+    .list-actions { display: flex; gap: 6px; }
+    .list-actions button { width: auto; padding: 5px 10px; margin: 0; font-size: 12px; }
+    .stat-item { margin-bottom: 12px; font-size: 14px; color: #1F2937; }
+    .stat-badge { background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 4px; padding: 8px 12px; margin-top: 4px; font-weight: 500; }
+  </style>
 </head>
 <body>
-    <div class="card">
-        <h1>🏥 EPS Vida Sana</h1>
-        <p>Bienvenido. Selecciona una opción para continuar.</p>
-        <button onclick="alert('Registro web en construcción')">Registrarse</button>
-        <button onclick="alert('Login web en construcción')">Iniciar sesión</button>
+
+  <!-- Vista Principal -->
+  <div id="view-home" class="card">
+    <div class="header"><h2>🏥 EPS Vida Sana</h2></div>
+    <p class="subtitle">Selecciona una opción para continuar</p>
+    <button class="btn-primary" onclick="showView('view-register')">Registrarse</button>
+    <button class="btn-primary" onclick="showView('view-login')">Iniciar sesión</button>
+  </div>
+
+  <!-- Vista Registro -->
+  <div id="view-register" class="card hidden">
+    <div class="header"><h3>Registro de Usuario</h3></div>
+    <div class="form-group">
+      <label>Número de documento (solo números)</label>
+      <input type="text" id="reg-doc">
     </div>
+    <div class="form-group">
+      <label>Nombre completo (solo letras y espacios)</label>
+      <input type="text" id="reg-nombre">
+    </div>
+    <div class="form-group">
+      <label>Contraseña (solo números)</label>
+      <input type="password" id="reg-pass">
+    </div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="registrarUsuario()">Registrar</button>
+      <button class="btn-secondary" onclick="showView('view-home')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Vista Login -->
+  <div id="view-login" class="card hidden">
+    <div class="header"><h3>Iniciar Sesión</h3></div>
+    <div class="form-group">
+      <label>Número de documento</label>
+      <input type="text" id="log-doc">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="log-pass">
+    </div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="iniciarSesion()">Ingresar</button>
+      <button class="btn-secondary" onclick="showView('view-home')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Menú de Usuario -->
+  <div id="view-menu" class="card hidden">
+    <div class="header"><h3 id="user-title">Hola</h3></div>
+    <p class="subtitle">¿Qué deseas hacer hoy?</p>
+    <button class="btn-primary" onclick="abrirAgendar()">📅 Agendar cita</button>
+    <button class="btn-accent" onclick="verCitas()">📋 Ver mis citas</button>
+    <button class="btn-warning" onclick="verCancelar()">❌ Cancelar cita</button>
+    <button class="btn-teal" onclick="verReprogramar()">🔄 Reprogramar cita</button>
+    <button class="btn-purple" onclick="verEstadisticas()">📊 Estadísticas</button>
+    <button class="btn-secondary" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+  </div>
+
+  <!-- Vista Agendar Cita -->
+  <div id="view-agendar" class="card hidden">
+    <div class="header"><h3>Agendar Cita</h3></div>
+    <div class="form-group">
+      <label>Tipo de cita</label>
+      <select id="cita-tipo" onchange="cambiarTipo()">
+        <option value="Médico general">Médico general</option>
+        <option value="Psicología">Psicología</option>
+        <option value="Toma de muestras">Toma de muestras</option>
+        <option value="Odontología">Odontología</option>
+        <option value="Especialista">Especialista</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" id="cita-fecha">
+      </div>
+      <div class="form-group">
+        <label>Hora (HH:MM)</label>
+        <input type="time" id="cita-hora">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Sede</label>
+      <select id="cita-sede">
+        <option value="Sede Centro - Calle 30 # 45-12">Sede Centro - Calle 30 # 45-12</option>
+        <option value="Sede Norte - Calle 84 # 53-20">Sede Norte - Calle 84 # 53-20</option>
+        <option value="Sede Sur - Carrera 7 Sur # 72-15">Sede Sur - Carrera 7 Sur # 72-15</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label id="lbl-extra">Motivo de consulta</label>
+      <input type="text" id="cita-extra">
+      <select id="cita-extra-select" class="hidden">
+        <option value="Primera vez">Primera vez</option>
+        <option value="Seguimiento">Seguimiento</option>
+        <option value="Cierre">Cierre</option>
+      </select>
+    </div>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="guardarCita()">Agendar</button>
+      <button class="btn-secondary" onclick="showView('view-menu')">Volver</button>
+    </div>
+  </div>
+
+  <!-- Vista Ver Citas -->
+  <div id="view-citas" class="card hidden">
+    <div class="header"><h3>Mis Citas Programadas</h3></div>
+    <div id="tabla-citas-container"></div>
+    <button class="btn-secondary" onclick="showView('view-menu')" style="margin-top: 16px;">Volver</button>
+  </div>
+
+  <!-- Vista Cancelar Citas -->
+  <div id="view-cancelar" class="card hidden">
+    <div class="header" style="background:#B91C1C;"><h3>Cancelar Cita</h3></div>
+    <div id="lista-cancelar-container"></div>
+    <button class="btn-secondary" onclick="showView('view-menu')" style="margin-top: 16px;">Volver</button>
+  </div>
+
+  <!-- Vista Reprogramar Citas -->
+  <div id="view-reprogramar" class="card hidden">
+    <div class="header" style="background:#065F46;"><h3>Reprogramar Cita</h3></div>
+    <div id="lista-reprogramar-container"></div>
+    <div id="form-reprogramar" class="hidden" style="margin-top: 16px; border-top: 1px solid #D1D5DB; padding-top: 12px;">
+      <h4 style="margin: 0 0 10px 0; color:#065F46;">Nueva fecha y hora</h4>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nueva Fecha</label>
+          <input type="date" id="rep-fecha">
+        </div>
+        <div class="form-group">
+          <label>Nueva Hora</label>
+          <input type="time" id="rep-hora">
+        </div>
+      </div>
+      <button class="btn-teal" onclick="guardarReprogramacion()">Confirmar Reprogramación</button>
+    </div>
+    <button class="btn-secondary" onclick="showView('view-menu')" style="margin-top: 16px;">Volver</button>
+  </div>
+
+  <!-- Vista Estadísticas del Sistema -->
+  <div id="view-estadisticas" class="card hidden">
+    <div class="header" style="background:#7C3AED;"><h3>📊 Estadísticas del Sistema</h3></div>
+    <div id="estadisticas-container"></div>
+    <button class="btn-secondary" onclick="showView('view-menu')" style="margin-top: 16px;">Volver</button>
+  </div>
+
+  <script>
+    let usuarios = JSON.parse(localStorage.getItem('eps_usuarios')) || {};
+    let citas = JSON.parse(localStorage.getItem('eps_citas')) || {};
+    let currentDoc = null;
+    let reprogramandoIdx = null;
+
+    function saveState() {
+      localStorage.setItem('eps_usuarios', JSON.stringify(usuarios));
+      localStorage.setItem('eps_citas', JSON.stringify(citas));
+    }
+
+    function showView(id) {
+      document.querySelectorAll('.card').forEach(el => el.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function validarNumero(t) { return /^\d+$/.test(t); }
+    function validarNombre(t) { return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(t); }
+
+    function registrarUsuario() {
+      const doc = document.getElementById('reg-doc').value.trim();
+      const nom = document.getElementById('reg-nombre').value.trim();
+      const pwd = document.getElementById('reg-pass').value.trim();
+
+      if (!validarNumero(doc)) return alert("El documento solo puede contener números.");
+      if (usuarios[doc]) return alert("El usuario ya existe.");
+      if (!validarNombre(nom)) return alert("El nombre solo puede contener letras y espacios.");
+      if (!validarNumero(pwd)) return alert("La contraseña solo puede contener números.");
+
+      usuarios[doc] = { documento: doc, nombre: nom, password: pwd };
+      citas[doc] = [];
+      saveState();
+      alert("Usuario registrado correctamente.");
+      showView('view-login');
+    }
+
+    function iniciarSesion() {
+      const doc = document.getElementById('log-doc').value.trim();
+      const pwd = document.getElementById('log-pass').value.trim();
+
+      if (!usuarios[doc]) return alert("Usuario no existe.");
+      if (usuarios[doc].password !== pwd) return alert("Contraseña incorrecta.");
+
+      currentDoc = doc;
+      document.getElementById('user-title').innerText = `Hola, ${usuarios[doc].nombre}`;
+      showView('view-menu');
+    }
+
+    function cerrarSesion() {
+      currentDoc = null;
+      showView('view-home');
+    }
+
+    function abrirAgendar() {
+      cambiarTipo();
+      showView('view-agendar');
+    }
+
+    function cambiarTipo() {
+      const tipo = document.getElementById('cita-tipo').value;
+      const lbl = document.getElementById('lbl-extra');
+      const input = document.getElementById('cita-extra');
+      const sel = document.getElementById('cita-extra-select');
+
+      input.classList.remove('hidden');
+      sel.classList.add('hidden');
+
+      if (tipo === "Médico general") lbl.innerText = "Motivo de consulta";
+      else if (tipo === "Psicología") {
+        lbl.innerText = "Tipo de sesión";
+        input.classList.add('hidden');
+        sel.classList.remove('hidden');
+      }
+      else if (tipo === "Toma de muestras") lbl.innerText = "Tipo de muestra (ej. sangre, orina)";
+      else if (tipo === "Odontología") lbl.innerText = "Procedimiento (ej. limpieza, extracción)";
+      else if (tipo === "Especialista") lbl.innerText = "Especialidad (ej. Cardiología)";
+    }
+
+    function validarFecha(fechaStr) {
+      const fecha = new Date(fechaStr + "T00:00:00");
+      const hoy = new Date();
+      hoy.setHours(0,0,0,0);
+      return fecha >= hoy;
+    }
+
+    function guardarCita() {
+      const tipo = document.getElementById('cita-tipo').value;
+      const fecha = document.getElementById('cita-fecha').value;
+      const hora = document.getElementById('cita-hora').value;
+      const sede = document.getElementById('cita-sede').value;
+      const extra = (tipo === "Psicología") ? document.getElementById('cita-extra-select').value : document.getElementById('cita-extra').value.trim();
+
+      if (!fecha || !hora) return alert("Ingresa fecha y hora válidas.");
+      if (!validarFecha(fecha)) return alert("No puedes agendar en fechas pasadas.");
+      if (!extra) return alert("Completa el campo adicional.");
+
+      const userCitas = citas[currentDoc] || [];
+      const duplicada = userCitas.some(c => c.fecha === fecha && c.hora === hora);
+      if (duplicada) return alert("Ya tienes una cita en ese horario.");
+
+      userCitas.push({ tipo, fecha, hora, sede, extra });
+      citas[currentDoc] = userCitas;
+      saveState();
+      alert("Cita agendada correctamente.");
+      showView('view-menu');
+    }
+
+    function verCitas() {
+      const userCitas = citas[currentDoc] || [];
+      const container = document.getElementById('tabla-citas-container');
+      if (userCitas.length === 0) {
+        container.innerHTML = "<p style='color:#6B7280; text-align:center; padding:20px 0;'>No tienes citas programadas.</p>";
+      } else {
+        let html = "<table><thead><tr><th>#</th><th>Tipo</th><th>Fecha</th><th>Hora</th><th>Detalle / Sede</th></tr></thead><tbody>";
+        userCitas.forEach((c, i) => {
+          html += `<tr><td>${i+1}</td><td>${c.tipo}</td><td>${c.fecha}</td><td>${c.hora}</td><td>${c.extra}<br><small style='color:#6B7280;'>${c.sede}</small></td></tr>`;
+        });
+        html += "</tbody></table>";
+        container.innerHTML = html;
+      }
+      showView('view-citas');
+    }
+
+    function verCancelar() {
+      const userCitas = citas[currentDoc] || [];
+      const container = document.getElementById('lista-cancelar-container');
+      if (userCitas.length === 0) {
+        container.innerHTML = "<p style='color:#6B7280; text-align:center; padding:20px 0;'>No tienes citas para cancelar.</p>";
+      } else {
+        let html = "";
+        userCitas.forEach((c, idx) => {
+          html += `<div class='list-item'>
+            <div><strong>${idx+1}. ${c.tipo}</strong><br><small>${c.fecha} - ${c.hora} | ${c.extra}</small></div>
+            <div class='list-actions'><button class='btn-danger' onclick='cancelarCita(${idx})'>Cancelar</button></div>
+          </div>`;
+        });
+        container.innerHTML = html;
+      }
+      showView('view-cancelar');
+    }
+
+    function cancelarCita(idx) {
+      if (confirm("¿Seguro que deseas cancelar esta cita?")) {
+        const eliminada = citas[currentDoc].splice(idx, 1)[0];
+        saveState();
+        alert(`Cita cancelada: ${eliminada.tipo} el ${eliminada.fecha} a las ${eliminada.hora}`);
+        verCancelar();
+      }
+    }
+
+    function verReprogramar() {
+      const userCitas = citas[currentDoc] || [];
+      const container = document.getElementById('lista-reprogramar-container');
+      document.getElementById('form-reprogramar').classList.add('hidden');
+      reprogramandoIdx = null;
+
+      if (userCitas.length === 0) {
+        container.innerHTML = "<p style='color:#6B7280; text-align:center; padding:20px 0;'>No tienes citas para reprogramar.</p>";
+      } else {
+        let html = "";
+        userCitas.forEach((c, idx) => {
+          html += `<div class='list-item'>
+            <div><strong>${idx+1}. ${c.tipo}</strong><br><small>${c.fecha} - ${c.hora} | ${c.extra}</small></div>
+            <div class='list-actions'><button class='btn-teal' onclick='iniciarReprogramacion(${idx})'>Elegir</button></div>
+          </div>`;
+        });
+        container.innerHTML = html;
+      }
+      showView('view-reprogramar');
+    }
+
+    function iniciarReprogramacion(idx) {
+      reprogramandoIdx = idx;
+      document.getElementById('form-reprogramar').classList.remove('hidden');
+    }
+
+    function guardarReprogramacion() {
+      if (reprogramandoIdx === null) return;
+      const nFecha = document.getElementById('rep-fecha').value;
+      const nHora = document.getElementById('rep-hora').value;
+
+      if (!nFecha || !nHora) return alert("Ingresa la nueva fecha y hora.");
+      if (!validarFecha(nFecha)) return alert("No puedes agendar en fechas pasadas.");
+
+      const userCitas = citas[currentDoc] || [];
+      const duplicada = userCitas.some((c, i) => i !== reprogramandoIdx && c.fecha === nFecha && c.hora === nHora);
+      if (duplicada) return alert("Ya tienes una cita en ese horario.");
+
+      userCitas[reprogramandoIdx].fecha = nFecha;
+      userCitas[reprogramandoIdx].hora = nHora;
+      saveState();
+      alert("Cita reprogramada correctamente.");
+      verReprogramar();
+    }
+
+    function verEstadisticas() {
+      const totalUsuarios = Object.keys(usuarios).length;
+      let totalCitas = 0;
+      const citasPorTipo = {
+        "Médico general": 0,
+        "Psicología": 0,
+        "Toma de muestras": 0,
+        "Odontología": 0,
+        "Especialista": 0
+      };
+      const citasPorSede = {};
+
+      Object.values(citas).forEach(lista => {
+        totalCitas += lista.length;
+        lista.forEach(cita => {
+          if (citasPorTipo[cita.tipo] !== undefined) citasPorTipo[cita.tipo]++;
+          citasPorSede[cita.sede] = (citasPorSede[cita.sede] || 0) + 1;
+        });
+      });
+
+      let sedeMasSolicitada = "No hay citas registradas";
+      if (Object.keys(citasPorSede).length > 0) {
+        sedeMasSolicitada = Object.keys(citasPorSede).reduce((a, b) => citasPorSede[a] > citasPorSede[b] ? a : b);
+      }
+
+      let html = `
+        <div class="stat-item"><strong>👤 Total de usuarios registrados:</strong> ${totalUsuarios}</div>
+        <div class="stat-item"><strong>📅 Total de citas registradas:</strong> ${totalCitas}</div>
+        <div class="stat-item">
+          <strong>🏥 Sede con más citas:</strong>
+          <div class="stat-badge">${sedeMasSolicitada}</div>
+        </div>
+        <div class="stat-item" style="margin-top: 16px;">
+          <strong>📋 Cantidad de citas por tipo:</strong>
+          <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+            <li><strong>Médico general:</strong> ${citasPorTipo["Médico general"]}</li>
+            <li><strong>Psicología:</strong> ${citasPorTipo["Psicología"]}</li>
+            <li><strong>Toma de muestras:</strong> ${citasPorTipo["Toma de muestras"]}</li>
+            <li><strong>Odontología:</strong> ${citasPorTipo["Odontología"]}</li>
+            <li><strong>Especialista:</strong> ${citasPorTipo["Especialista"]}</li>
+          </ul>
+        </div>
+      `;
+
+      document.getElementById('estadisticas-container').innerHTML = html;
+      showView('view-estadisticas');
+    }
+  </script>
 </body>
 </html>
