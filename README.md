@@ -24,3 +24,4 @@ Integrantes: Sebastian Perez, Naim Pacheco y Samuel Dominguez
    ## Despliegue en AWS
 | Integrante | URL del sitio | Bucket público | Bucket privado |
 | Naim Pacheco | http://cuc-bp-eq34-pacheco-sitio-2026.s3-website-us-east-1.amazonaws.com | cuc-bp-eq34-pacheco-sitio-2026 | cuc-bp-eq34-pacheco-privado-2026 |
+Migramos el proyecto de Netlify a Amazon S3 para empezar a usar servicios de nube reales y tener mayor control de la infraestructura. Para lograr esto creamos dos buckets con propósitos distintos: el bucket público (al que le quitamos el bloqueo y le pusimos una política especial de lectura) es el que se encarga de mostrar la página web y permitir que cualquiera la visite en internet sin problemas; mientras que el bucket privado mantiene activado el bloqueo total para asegurarnos de que nadie por fuera pueda ver los archivos internos, protegiendo así los datos sensibles de la aplicación.
