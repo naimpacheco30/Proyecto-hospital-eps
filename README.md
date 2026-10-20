@@ -32,10 +32,6 @@ Migramos el proyecto de Netlify a Amazon S3 para empezar a usar servicios de nub
    - *Decisión*: Habilitar el versionado en el bucket de producción.
    - *Justificación*: Permite proteger el sitio web frente a eliminaciones accidentales o sobreescrituras erróneas de archivos estáticos (como el `index.html`), facilitando la recuperación rápida mediante la eliminación de marcadores de eliminación.
 
-2. **Estructura de Prefijos en Bucket Privado (`cuc-bp-eq34-pacheco-privado-2026`)**:
-   - *Decisión*: Organizar la información mediante prefijos lógicos (`Respaldos/`, `uploads/`, `documentos/`, `logs/`).
-   - *Justificación*: Facilita la gobernanza de datos y permite aplicar futuras reglas de seguridad o políticas de ciclo de vida específicas por cada tipo de activo empresarial.
-
-3. **Políticas de Ciclo de Vida y Optimización de Costos (`retencion-sitio`)**:
+2. **Políticas de Ciclo de Vida y Optimización de Costos (`retencion-sitio`)**:
    - *Decisión*: Automatizar la transición de versiones actuales a *Standard-IA* a los 30 días y la purga permanente de versiones no vigentes a los 180 días.
    - *Justificación*: Optimiza los costos de almacenamiento en la nube a largo plazo al evitar la acumulación indefinida de respaldos y archivos históricos obsoletos.
