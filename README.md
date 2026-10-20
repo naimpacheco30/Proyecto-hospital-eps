@@ -3,7 +3,7 @@
 
 | Integrante | URL del sitio | Bucket público | Bucket privado |
 |---|---|---|---|
-| Dominguez | http://cuc-bp-eq34-dominguez-sitio-2026.s3-website-us-east-1.amazonaws.com | cuc-bp-eq34-dominguez-sitio-2026 | cuc-bp-eq34-dominguez-privado-2026 |
+| Dominguez Samuel | http://cuc-bp-eq34-dominguez-sitio-2026.s3-website-us-east-1.amazonaws.com | cuc-bp-eq34-dominguez-sitio-2026 | cuc-bp-eq34-dominguez-privado-2026 |
 
 ### Descripción del despliegue
 
