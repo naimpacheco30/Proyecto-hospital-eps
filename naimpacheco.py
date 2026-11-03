@@ -1,0 +1,790 @@
+#Modulo de interfaz
+import tkinter as tk
+from tkinter import ttk, messagebox
+from datetime import datetime
+class Usuario:
+    def __init__(self, documento, nombre, password):
+        self.documento = documento
+        self.nombre = nombre
+        self.password = password
+
+
+class Cita:
+    def __init__(self, fecha, hora, sede):
+        self.fecha = fecha
+        self.hora = hora
+        self.sede = sede
+
+    def tipo(self):
+        return "Cita general"
+
+    def __str__(self):
+        return f"Cita - {self.fecha} a las {self.hora} | {self.sede}"
+
+
+class CitaMedico(Cita):
+    def __init__(self, fecha, hora, sede, motivo):
+        super().__init__(fecha, hora, sede)
+        self.motivo = motivo
+
+    def tipo(self):
+        return "Médico general"
+
+    def __str__(self):
+        return (f"Médico general - {self.fecha} a las {self.hora} | "
+                f"{self.sede} | Motivo: {self.motivo}")
+
+
+class CitaPsicologia(Cita):
+    SESIONES = {"Primera vez": "Primera vez", "Seguimiento": "Seguimiento", "Cierre": "Cierre"}
+
+    def __init__(self, fecha, hora, sede, sesion):
+        super().__init__(fecha, hora, sede)
+        self.sesion = sesion
+
+    def tipo(self):
+        return "Psicología"
+
+    def __str__(self):
+        return (f"Psicología - {self.fecha} a las {self.hora} | "
+                f"{self.sede} | Sesión: {self.sesion}")
+
+
+class CitaMuestras(Cita):
+    def __init__(self, fecha, hora, sede, tipo_muestra):
+        super().__init__(fecha, hora, sede)
+        self.tipo_muestra = tipo_muestra
+
+    def tipo(self):
+        return "Toma de muestras"
+
+    def __str__(self):
+        return (f"Toma de muestras - {self.fecha} a las {self.hora} | "
+                f"{self.sede} | Muestra: {self.tipo_muestra}")
+
+
+class CitaOdontologia(Cita):
+    def __init__(self, fecha, hora, sede, procedimiento):
+        super().__init__(fecha, hora, sede)
+        self.procedimiento = procedimiento
+
+    def tipo(self):
+        return "Odontología"
+
+    def __str__(self):
+        return (f"Odontología - {self.fecha} a las {self.hora} | "
+                f"{self.sede} | Procedimiento: {self.procedimiento}")
+
+
+class CitaEspecialista(Cita):
+    def __init__(self, fecha, hora, sede, especialidad):
+        super().__init__(fecha, hora, sede)
+        self.especialidad = especialidad
+
+    def tipo(self):
+        return "Especialista"
+
+    def __str__(self):
+        return (f"Especialista ({self.especialidad}) - {self.fecha} a las "
+                f"{self.hora} | {self.sede}")
+
+
+class SistemaEPS:
+    SEDES = [
+        "Sede Centro - Calle 30 # 45-12",
+        "Sede Norte - Calle 84 # 53-20",
+        "Sede Sur - Carrera 7 Sur # 72-15",
+    ]
+    TIPOS = ["Médico general", "Psicología", "Toma de muestras", "Odontología", "Especialista"]
+
+    def __init__(self):
+        self.usuarios = {}
+        self.citas = {}
+
+    def validar_numero(self, texto):
+        return texto.isdigit()
+
+    def validar_nombre(self, texto):
+        return texto.replace(" ", "").isalpha()
+
+    def validar_fecha_hora(self, fecha, hora):
+        try:
+            fecha_dt = datetime.strptime(fecha, "%d/%m/%Y")
+            datetime.strptime(hora, "%H:%M")
+            if fecha_dt.date() < datetime.now().date():
+                return False, "No puedes agendar en fechas pasadas."
+            return True, ""
+        except Exception:
+            return False, "Formato de fecha u hora inválido. Usa DD/MM/AAAA y HH:MM."
+
+    def cita_duplicada(self, doc, fecha, hora):
+        for cita in self.citas.get(doc, []):
+            if cita.fecha == fecha and cita.hora == hora:
+                return True
+        return False
+
+    def registrar_usuario(self, doc, nombre, password):
+        if not self.validar_numero(doc):
+            return False, "El documento solo puede contener números."
+        if doc in self.usuarios:
+            return False, "El usuario ya existe."
+        if not self.validar_nombre(nombre):
+            return False, "El nombre solo puede contener letras y espacios."
+        if not self.validar_numero(password):
+            return False, "La contraseña solo puede contener números."
+        self.usuarios[doc] = Usuario(doc, nombre, password)
+        self.citas[doc] = []
+        return True, "Usuario registrado correctamente."
+
+    def iniciar_sesion(self, doc, password):
+        if doc not in self.usuarios:
+            return False, "Usuario no existe."
+        if self.usuarios[doc].password != password:
+            return False, "Contraseña incorrecta."
+        return True, self.usuarios[doc].nombre
+
+    def agendar_cita(self, doc, tipo, fecha, hora, sede, extra):
+        ok, msg = self.validar_fecha_hora(fecha, hora)
+        if not ok:
+            return False, msg
+        if self.cita_duplicada(doc, fecha, hora):
+            return False, "Ya tienes una cita en ese horario."
+        if not sede:
+            return False, "Selecciona una sede."
+        if tipo == "Médico general":
+            cita = CitaMedico(fecha, hora, sede, extra)
+        elif tipo == "Psicología":
+            cita = CitaPsicologia(fecha, hora, sede, extra)
+        elif tipo == "Toma de muestras":
+            cita = CitaMuestras(fecha, hora, sede, extra)
+        elif tipo == "Odontología":
+            cita = CitaOdontologia(fecha, hora, sede, extra)
+        elif tipo == "Especialista":
+            cita = CitaEspecialista(fecha, hora, sede, extra)
+        else:
+            return False, "Tipo de cita inválido."
+        self.citas[doc].append(cita)
+        return True, "Cita agendada correctamente."
+
+    def cancelar_cita(self, doc, indice):
+        eliminada = self.citas[doc].pop(indice)
+        return str(eliminada)
+
+    def reprogramar_cita(self, doc, indice, nueva_fecha, nueva_hora):
+        ok, msg = self.validar_fecha_hora(nueva_fecha, nueva_hora)
+        if not ok:
+            return False, msg
+        if self.cita_duplicada(doc, nueva_fecha, nueva_hora):
+            return False, "Ya tienes una cita en ese horario."
+        self.citas[doc][indice].fecha = nueva_fecha
+        self.citas[doc][indice].hora = nueva_hora
+        return True, "Cita reprogramada correctamente."
+
+
+#Estilo y colores
+
+BG        = "#F0F4FF"
+CARD      = "#FFFFFF"
+PRIMARY   = "#2E4883"
+PRIMARY_H = "#1F3864"
+ACCENT    = "#4F78C8"
+SUCCESS   = "#166534"
+DANGER    = "#991B1B"
+TEXT      = "#1F2937"
+MUTED     = "#6B7280"
+BORDER    = "#D1D5DB"
+
+FONT_TITLE  = ("Arial", 18, "bold")
+FONT_HEAD   = ("Arial", 13, "bold")
+FONT_BODY   = ("Arial", 11)
+FONT_SMALL  = ("Arial", 9)
+FONT_BTN    = ("Arial", 11, "bold")
+FONT_MONO   = ("Courier New", 10)
+
+
+def styled_btn(parent, text, command, color=PRIMARY, fg="white", width=18):
+    btn = tk.Button(
+        parent, text=text, command=command,
+        bg=color, fg=fg, font=FONT_BTN,
+        relief="flat", cursor="hand2",
+        padx=12, pady=8, width=width,
+        activebackground=PRIMARY_H, activeforeground="white"
+    )
+    btn.bind("<Enter>", lambda e: btn.config(bg=PRIMARY_H if color == PRIMARY else color))
+    btn.bind("<Leave>", lambda e: btn.config(bg=color))
+    return btn
+
+
+def lbl_field(parent, text, row, col=0, colspan=1):
+    tk.Label(parent, text=text, font=FONT_BODY, bg=CARD, fg=MUTED,
+             anchor="w").grid(row=row, column=col, columnspan=colspan,
+                              sticky="w", padx=(0, 8), pady=(8, 2))
+
+
+def entry_field(parent, row, col=0, colspan=2, show=None, width=28):
+    e = tk.Entry(parent, font=FONT_BODY, relief="solid", bd=1,
+                 bg="#F9FAFB", fg=TEXT, width=width,
+                 highlightthickness=1, highlightbackground=BORDER,
+                 highlightcolor=ACCENT, show=show or "")
+    e.grid(row=row, column=col, columnspan=colspan,
+           sticky="ew", pady=(0, 4))
+    return e
+
+
+def card_frame(parent, padx=30, pady=24):
+    f = tk.Frame(parent, bg=CARD, bd=0, relief="flat",
+                 highlightthickness=1, highlightbackground=BORDER)
+    f.pack(padx=padx, pady=pady, fill="both", expand=True)
+    return f
+
+
+#Ventana
+
+class AppEPS(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.sistema = SistemaEPS()
+        self.usuario_actual = None
+
+        self.title("EPS Vida Sana")
+        self.geometry("520x440")
+        self.resizable(False, False)
+        self.configure(bg=BG)
+        self._center()
+        self._build()
+
+    def _center(self):
+        self.update_idletasks()
+        w, h = 520, 440
+        x = (self.winfo_screenwidth() - w) // 2
+        y = (self.winfo_screenheight() - h) // 2
+        self.geometry(f"{w}x{h}+{x}+{y}")
+
+    def _build(self):
+        header = tk.Frame(self, bg=PRIMARY, height=80)
+        header.pack(fill="x")
+        header.pack_propagate(False)
+        tk.Label(header, text="🏥  EPS Vida Sana", font=("Arial", 20, "bold"),
+                 bg=PRIMARY, fg="white").pack(expand=True)
+
+        card = card_frame(self, padx=60, pady=40)
+        tk.Label(card, text="Bienvenido", font=FONT_TITLE,
+                 bg=CARD, fg=PRIMARY).pack(pady=(10, 4))
+        tk.Label(card, text="Selecciona una opción para continuar",
+                 font=FONT_BODY, bg=CARD, fg=MUTED).pack(pady=(0, 24))
+
+        styled_btn(card, "Registrarse", self._abrir_registro, width=22).pack(pady=6)
+        styled_btn(card, "Iniciar sesión", self._abrir_login, width=22).pack(pady=6)
+        styled_btn(card, "Salir", self.destroy, color="#DC2626", width=22).pack(pady=6)
+
+    def _abrir_registro(self):
+        VentanaRegistro(self, self.sistema)
+
+    def _abrir_login(self):
+        VentanaLogin(self, self.sistema, self._on_login)
+
+    def _on_login(self, doc, nombre):
+        self.usuario_actual = doc
+        VentanaMenuUsuario(self, self.sistema, doc, nombre)
+
+
+#Registro
+
+class VentanaRegistro(tk.Toplevel):
+    def __init__(self, parent, sistema):
+        super().__init__(parent)
+        self.sistema = sistema
+        self.title("Registrarse")
+        self.geometry("420x380")
+        self.resizable(False, False)
+        self.configure(bg=BG)
+        self.grab_set()
+        self._center(parent)
+        self._build()
+
+    def _center(self, parent):
+        self.update_idletasks()
+        x = parent.winfo_x() + (parent.winfo_width() - 420) // 2
+        y = parent.winfo_y() + (parent.winfo_height() - 380) // 2
+        self.geometry(f"420x380+{x}+{y}")
+
+    def _build(self):
+        tk.Frame(self, bg=PRIMARY, height=50).pack(fill="x")
+        tk.Label(self.winfo_children()[0], text="Registro de usuario",
+                 font=FONT_HEAD, bg=PRIMARY, fg="white").pack(expand=True)
+
+        card = card_frame(self, padx=30, pady=20)
+        card.columnconfigure(1, weight=1)
+
+        lbl_field(card, "Número de documento", 0)
+        self.e_doc = entry_field(card, 1)
+
+        lbl_field(card, "Nombre completo", 2)
+        self.e_nombre = entry_field(card, 3)
+
+        lbl_field(card, "Contraseña (solo números)", 4)
+        self.e_pass = entry_field(card, 5, show="*")
+
+        btn_frame = tk.Frame(card, bg=CARD)
+        btn_frame.grid(row=6, column=0, columnspan=2, pady=(16, 0))
+        styled_btn(btn_frame, "Registrar", self._registrar, width=14).pack(side="left", padx=4)
+        styled_btn(btn_frame, "Cancelar", self.destroy, color="#6B7280", width=14).pack(side="left", padx=4)
+
+    def _registrar(self):
+        doc = self.e_doc.get().strip()
+        nombre = self.e_nombre.get().strip()
+        pwd = self.e_pass.get().strip()
+        ok, msg = self.sistema.registrar_usuario(doc, nombre, pwd)
+        if ok:
+            messagebox.showinfo("Éxito", msg, parent=self)
+            self.destroy()
+        else:
+            messagebox.showerror("Error", msg, parent=self)
+
+
+#Iniciar sesión
+
+class VentanaLogin(tk.Toplevel):
+    def __init__(self, parent, sistema, on_success):
+        super().__init__(parent)
+        self.sistema = sistema
+        self.on_success = on_success
+        self.title("Iniciar sesión")
+        self.geometry("400x300")
+        self.resizable(False, False)
+        self.configure(bg=BG)
+        self.grab_set()
+        self._center(parent)
+        self._build()
+
+    def _center(self, parent):
+        x = parent.winfo_x() + (parent.winfo_width() - 400) // 2
+        y = parent.winfo_y() + (parent.winfo_height() - 300) // 2
+        self.geometry(f"400x300+{x}+{y}")
+
+    def _build(self):
+        tk.Frame(self, bg=PRIMARY, height=50).pack(fill="x")
+        tk.Label(self.winfo_children()[0], text="Iniciar sesión",
+                 font=FONT_HEAD, bg=PRIMARY, fg="white").pack(expand=True)
+
+        card = card_frame(self, padx=30, pady=20)
+        card.columnconfigure(1, weight=1)
+
+        lbl_field(card, "Número de documento", 0)
+        self.e_doc = entry_field(card, 1)
+
+        lbl_field(card, "Contraseña", 2)
+        self.e_pass = entry_field(card, 3, show="*")
+
+        btn_frame = tk.Frame(card, bg=CARD)
+        btn_frame.grid(row=4, column=0, columnspan=2, pady=(16, 0))
+        styled_btn(btn_frame, "Ingresar", self._login, width=14).pack(side="left", padx=4)
+        styled_btn(btn_frame, "Cancelar", self.destroy, color="#6B7280", width=14).pack(side="left", padx=4)
+
+    def _login(self):
+        doc = self.e_doc.get().strip()
+        pwd = self.e_pass.get().strip()
+        ok, resultado = self.sistema.iniciar_sesion(doc, pwd)
+        if ok:
+            self.destroy()
+            self.on_success(doc, resultado)
+        else:
+            messagebox.showerror("Error", resultado, parent=self)
+
+
+#Menu
+
+class VentanaMenuUsuario(tk.Toplevel):
+    def __init__(self, parent, sistema, doc, nombre):
+        super().__init__(parent)
+        self.sistema = sistema
+        self.doc = doc
+        self.nombre = nombre
+        self.title(f"Menú — {nombre}")
+        self.geometry("500x420")
+        self.resizable(False, False)
+        self.configure(bg=BG)
+        self.grab_set()
+        self._center(parent)
+        self._build()
+
+    def _center(self, parent):
+        x = parent.winfo_x() + (parent.winfo_width() - 500) // 2
+        y = parent.winfo_y() + (parent.winfo_height() - 420) // 2
+        self.geometry(f"500x420+{x}+{y}")
+
+    def _build(self):
+        header = tk.Frame(self, bg=PRIMARY, height=70)
+        header.pack(fill="x")
+        header.pack_propagate(False)
+        tk.Label(header, text=f"Hola, {self.nombre}",
+                 font=("Arial", 15, "bold"), bg=PRIMARY, fg="white").pack(pady=(12, 0))
+        tk.Label(header, text="¿Qué deseas hacer hoy?",
+                 font=FONT_SMALL, bg=PRIMARY, fg="#BFD0F0").pack()
+
+        card = card_frame(self, padx=60, pady=30)
+
+        btns = [
+            ("📅  Agendar cita",      self._agendar,      PRIMARY),
+            ("📋  Ver mis citas",     self._ver,           ACCENT),
+            ("❌  Cancelar cita",     self._cancelar,      "#B45309"),
+            ("🔄  Reprogramar cita",  self._reprogramar,   "#065F46"),
+            ("🚪  Cerrar sesión",     self.destroy,        "#6B7280"),
+        ]
+        for txt, cmd, col in btns:
+            styled_btn(card, txt, cmd, color=col, width=26).pack(pady=5)
+
+    def _agendar(self):
+        VentanaAgendarCita(self, self.sistema, self.doc)
+
+    def _ver(self):
+        VentanaVerCitas(self, self.sistema, self.doc)
+
+    def _cancelar(self):
+        VentanaCancelarCita(self, self.sistema, self.doc)
+
+    def _reprogramar(self):
+        VentanaReprogramarCita(self, self.sistema, self.doc)
+
+
+#Agendar cita
+
+class VentanaAgendarCita(tk.Toplevel):
+    EXTRA_LABELS = {
+        "Médico general":   "Motivo de consulta",
+        "Psicología":       "Tipo de sesión",
+        "Toma de muestras": "Tipo de muestra (ej. sangre, orina)",
+        "Odontología":      "Procedimiento (ej. limpieza, extracción)",
+        "Especialista":     "Especialidad (ej. Cardiología)",
+    }
+
+    def __init__(self, parent, sistema, doc):
+        super().__init__(parent)
+        self.sistema = sistema
+        self.doc = doc
+        self.title("Agendar cita")
+        self.geometry("480x480")
+        self.resizable(False, False)
+        self.configure(bg=BG)
+        self.grab_set()
+        self._center(parent)
+        self._build()
+
+    def _center(self, parent):
+        x = parent.winfo_x() + (parent.winfo_width() - 480) // 2
+        y = parent.winfo_y() + (parent.winfo_height() - 480) // 2
+        self.geometry(f"480x480+{x}+{y}")
+
+    def _build(self):
+        tk.Frame(self, bg=PRIMARY, height=50).pack(fill="x")
+        tk.Label(self.winfo_children()[0], text="Agendar nueva cita",
+                 font=FONT_HEAD, bg=PRIMARY, fg="white").pack(expand=True)
+
+        card = card_frame(self, padx=30, pady=16)
+        card.columnconfigure(1, weight=1)
+
+        #Tipo de cita
+        lbl_field(card, "Tipo de cita", 0)
+        self.tipo_var = tk.StringVar(value=SistemaEPS.TIPOS[0])
+        cb_tipo = ttk.Combobox(card, textvariable=self.tipo_var,
+                               values=SistemaEPS.TIPOS, state="readonly",
+                               font=FONT_BODY, width=26)
+        cb_tipo.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(0, 4))
+        cb_tipo.bind("<<ComboboxSelected>>", self._on_tipo_change)
+
+        #Fecha y hora en la misma fila
+        lbl_field(card, "Fecha (DD/MM/AAAA)", 2)
+        lbl_field(card, "Hora (HH:MM)", 2, col=2)
+        self.e_fecha = tk.Entry(card, font=FONT_BODY, relief="solid", bd=1,
+                                bg="#F9FAFB", fg=TEXT, width=14)
+        self.e_fecha.grid(row=3, column=0, sticky="ew", padx=(0, 8), pady=(0, 4))
+        self.e_hora = tk.Entry(card, font=FONT_BODY, relief="solid", bd=1,
+                               bg="#F9FAFB", fg=TEXT, width=10)
+        self.e_hora.grid(row=3, column=2, sticky="ew", pady=(0, 4))
+
+        #Sede
+        lbl_field(card, "Sede", 4)
+        self.sede_var = tk.StringVar(value=SistemaEPS.SEDES[0])
+        cb_sede = ttk.Combobox(card, textvariable=self.sede_var,
+                               values=SistemaEPS.SEDES, state="readonly",
+                               font=FONT_BODY, width=26)
+        cb_sede.grid(row=5, column=0, columnspan=3, sticky="ew", pady=(0, 4))
+
+        #Campo extra dinámico
+        self.lbl_extra = tk.Label(card, text=self.EXTRA_LABELS["Médico general"],
+                                  font=FONT_BODY, bg=CARD, fg=MUTED, anchor="w")
+        self.lbl_extra.grid(row=6, column=0, columnspan=3, sticky="w", pady=(8, 2))
+        self.e_extra = tk.Entry(card, font=FONT_BODY, relief="solid", bd=1,
+                                bg="#F9FAFB", fg=TEXT, width=36)
+        self.e_extra.grid(row=7, column=0, columnspan=3, sticky="ew", pady=(0, 4))
+
+        #Combobox para psicología (oculto por defecto)
+        self.sesion_var = tk.StringVar(value="Primera vez")
+        self.cb_sesion = ttk.Combobox(card, textvariable=self.sesion_var,
+                                      values=["Primera vez", "Seguimiento", "Cierre"],
+                                      state="readonly", font=FONT_BODY, width=26)
+        self.cb_sesion.grid(row=8, column=0, columnspan=3, sticky="ew", pady=(0, 4))
+        self.cb_sesion.grid_remove()
+
+        card.columnconfigure(0, weight=2)
+        card.columnconfigure(2, weight=1)
+
+        btn_frame = tk.Frame(card, bg=CARD)
+        btn_frame.grid(row=9, column=0, columnspan=3, pady=(16, 0))
+        styled_btn(btn_frame, "Agendar", self._agendar, width=14).pack(side="left", padx=4)
+        styled_btn(btn_frame, "Cancelar", self.destroy, color="#6B7280", width=14).pack(side="left", padx=4)
+
+    def _on_tipo_change(self, event=None):
+        tipo = self.tipo_var.get()
+        self.lbl_extra.config(text=self.EXTRA_LABELS.get(tipo, ""))
+        if tipo == "Psicología":
+            self.e_extra.grid_remove()
+            self.cb_sesion.grid()
+        else:
+            self.cb_sesion.grid_remove()
+            self.e_extra.grid()
+
+    def _agendar(self):
+        tipo = self.tipo_var.get()
+        fecha = self.e_fecha.get().strip()
+        hora = self.e_hora.get().strip()
+        sede = self.sede_var.get()
+        extra = self.sesion_var.get() if tipo == "Psicología" else self.e_extra.get().strip()
+
+        if not extra:
+            messagebox.showerror("Error", "Completa el campo adicional.", parent=self)
+            return
+
+        ok, msg = self.sistema.agendar_cita(self.doc, tipo, fecha, hora, sede, extra)
+        if ok:
+            messagebox.showinfo("Éxito", msg, parent=self)
+            self.destroy()
+        else:
+            messagebox.showerror("Error", msg, parent=self)
+
+#vEr cita
+
+class VentanaVerCitas(tk.Toplevel):
+    def __init__(self, parent, sistema, doc):
+        super().__init__(parent)
+        self.sistema = sistema
+        self.doc = doc
+        self.title("Mis citas")
+        self.geometry("620x380")
+        self.resizable(True, False)
+        self.configure(bg=BG)
+        self.grab_set()
+        self._center(parent)
+        self._build()
+
+    def _center(self, parent):
+        x = parent.winfo_x() + (parent.winfo_width() - 620) // 2
+        y = parent.winfo_y() + (parent.winfo_height() - 380) // 2
+        self.geometry(f"620x380+{x}+{y}")
+
+    def _build(self):
+        tk.Frame(self, bg=PRIMARY, height=50).pack(fill="x")
+        tk.Label(self.winfo_children()[0], text="Mis citas programadas",
+                 font=FONT_HEAD, bg=PRIMARY, fg="white").pack(expand=True)
+
+        card = card_frame(self, padx=20, pady=16)
+        citas = self.sistema.citas.get(self.doc, [])
+
+        if not citas:
+            tk.Label(card, text="No tienes citas programadas.",
+                     font=FONT_BODY, bg=CARD, fg=MUTED).pack(pady=40)
+        else:
+            #Tabla con scrollbar
+            frame_tabla = tk.Frame(card, bg=CARD)
+            frame_tabla.pack(fill="both", expand=True)
+
+            cols = ("#", "Tipo", "Fecha", "Hora", "Info extra")
+            tree = ttk.Treeview(frame_tabla, columns=cols, show="headings", height=10)
+            tree.heading("#", text="#")
+            tree.heading("Tipo", text="Tipo")
+            tree.heading("Fecha", text="Fecha")
+            tree.heading("Hora", text="Hora")
+            tree.heading("Info extra", text="Detalle")
+            tree.column("#", width=30, anchor="center")
+            tree.column("Tipo", width=140)
+            tree.column("Fecha", width=90, anchor="center")
+            tree.column("Hora", width=60, anchor="center")
+            tree.column("Info extra", width=250)
+
+            sb = ttk.Scrollbar(frame_tabla, orient="vertical", command=tree.yview)
+            tree.configure(yscrollcommand=sb.set)
+            tree.pack(side="left", fill="both", expand=True)
+            sb.pack(side="right", fill="y")
+
+            for i, c in enumerate(citas):
+                extra = ""
+                if hasattr(c, 'motivo'):        extra = f"Motivo: {c.motivo}"
+                elif hasattr(c, 'sesion'):      extra = f"Sesión: {c.sesion}"
+                elif hasattr(c, 'tipo_muestra'):extra = f"Muestra: {c.tipo_muestra}"
+                elif hasattr(c, 'procedimiento'):extra = f"Proc.: {c.procedimiento}"
+                elif hasattr(c, 'especialidad'):extra = f"Espec.: {c.especialidad}"
+                tree.insert("", "end", values=(i+1, c.tipo(), c.fecha, c.hora, extra))
+
+        styled_btn(card, "Cerrar", self.destroy, color="#6B7280", width=12).pack(pady=(12, 0))
+
+
+#CAncelar cita
+
+class VentanaCancelarCita(tk.Toplevel):
+    def __init__(self, parent, sistema, doc):
+        super().__init__(parent)
+        self.sistema = sistema
+        self.doc = doc
+        self.title("Cancelar cita")
+        self.geometry("580x360")
+        self.resizable(False, False)
+        self.configure(bg=BG)
+        self.grab_set()
+        self._center(parent)
+        self._build()
+
+    def _center(self, parent):
+        x = parent.winfo_x() + (parent.winfo_width() - 580) // 2
+        y = parent.winfo_y() + (parent.winfo_height() - 360) // 2
+        self.geometry(f"580x360+{x}+{y}")
+
+    def _build(self):
+        tk.Frame(self, bg="#B91C1C", height=50).pack(fill="x")
+        tk.Label(self.winfo_children()[0], text="Cancelar cita",
+                 font=FONT_HEAD, bg="#B91C1C", fg="white").pack(expand=True)
+
+        card = card_frame(self, padx=20, pady=16)
+        citas = self.sistema.citas.get(self.doc, [])
+
+        if not citas:
+            tk.Label(card, text="No tienes citas para cancelar.",
+                     font=FONT_BODY, bg=CARD, fg=MUTED).pack(pady=30)
+            styled_btn(card, "Cerrar", self.destroy, color="#6B7280").pack()
+            return
+
+        tk.Label(card, text="Selecciona la cita a cancelar:",
+                 font=FONT_BODY, bg=CARD, fg=TEXT).pack(anchor="w", pady=(0, 8))
+
+        lb_frame = tk.Frame(card, bg=CARD)
+        lb_frame.pack(fill="both", expand=True)
+        sb = tk.Scrollbar(lb_frame)
+        sb.pack(side="right", fill="y")
+        self.listbox = tk.Listbox(lb_frame, yscrollcommand=sb.set, font=FONT_MONO,
+                                  selectbackground=ACCENT, selectforeground="white",
+                                  height=8, relief="solid", bd=1)
+        self.listbox.pack(side="left", fill="both", expand=True)
+        sb.config(command=self.listbox.yview)
+
+        for i, c in enumerate(citas):
+            self.listbox.insert("end", f"  {i+1}. {c}")
+
+        btn_frame = tk.Frame(card, bg=CARD)
+        btn_frame.pack(pady=(12, 0))
+        styled_btn(btn_frame, "Cancelar cita", self._cancelar, color="#DC2626", width=16).pack(side="left", padx=4)
+        styled_btn(btn_frame, "Cerrar", self.destroy, color="#6B7280", width=12).pack(side="left", padx=4)
+
+    def _cancelar(self):
+        sel = self.listbox.curselection()
+        if not sel:
+            messagebox.showwarning("Aviso", "Selecciona una cita primero.", parent=self)
+            return
+        idx = sel[0]
+        confirm = messagebox.askyesno("Confirmar", "¿Seguro que deseas cancelar esta cita?", parent=self)
+        if confirm:
+            eliminada = self.sistema.cancelar_cita(self.doc, idx)
+            messagebox.showinfo("Cancelada", f"Cita cancelada:\n{eliminada}", parent=self)
+            self.destroy()
+
+
+#Reprogramar cita
+
+class VentanaReprogramarCita(tk.Toplevel):
+    def __init__(self, parent, sistema, doc):
+        super().__init__(parent)
+        self.sistema = sistema
+        self.doc = doc
+        self.title("Reprogramar cita")
+        self.geometry("580x420")
+        self.resizable(False, False)
+        self.configure(bg=BG)
+        self.grab_set()
+        self._center(parent)
+        self._build()
+
+    def _center(self, parent):
+        x = parent.winfo_x() + (parent.winfo_width() - 580) // 2
+        y = parent.winfo_y() + (parent.winfo_height() - 420) // 2
+        self.geometry(f"580x420+{x}+{y}")
+
+    def _build(self):
+        tk.Frame(self, bg="#065F46", height=50).pack(fill="x")
+        tk.Label(self.winfo_children()[0], text="Reprogramar cita",
+                 font=FONT_HEAD, bg="#065F46", fg="white").pack(expand=True)
+
+        card = card_frame(self, padx=24, pady=16)
+        citas = self.sistema.citas.get(self.doc, [])
+
+        if not citas:
+            tk.Label(card, text="No tienes citas para reprogramar.",
+                     font=FONT_BODY, bg=CARD, fg=MUTED).pack(pady=30)
+            styled_btn(card, "Cerrar", self.destroy, color="#6B7280").pack()
+            return
+
+        tk.Label(card, text="Selecciona la cita a reprogramar:",
+                 font=FONT_BODY, bg=CARD, fg=TEXT).pack(anchor="w", pady=(0, 6))
+
+        lb_frame = tk.Frame(card, bg=CARD)
+        lb_frame.pack(fill="x")
+        sb = tk.Scrollbar(lb_frame)
+        sb.pack(side="right", fill="y")
+        self.listbox = tk.Listbox(lb_frame, yscrollcommand=sb.set, font=FONT_MONO,
+                                  selectbackground=ACCENT, selectforeground="white",
+                                  height=6, relief="solid", bd=1)
+        self.listbox.pack(side="left", fill="both", expand=True)
+        sb.config(command=self.listbox.yview)
+        for i, c in enumerate(citas):
+            self.listbox.insert("end", f"  {i+1}. {c}")
+
+        campos = tk.Frame(card, bg=CARD)
+        campos.pack(fill="x", pady=(12, 0))
+        campos.columnconfigure(1, weight=1)
+        campos.columnconfigure(3, weight=1)
+
+        tk.Label(campos, text="Nueva fecha (DD/MM/AAAA)", font=FONT_BODY,
+                 bg=CARD, fg=MUTED).grid(row=0, column=0, sticky="w", padx=(0, 8))
+        self.e_fecha = tk.Entry(campos, font=FONT_BODY, relief="solid", bd=1,
+                                bg="#F9FAFB", fg=TEXT, width=14)
+        self.e_fecha.grid(row=0, column=1, sticky="ew", padx=(0, 16))
+
+        tk.Label(campos, text="Nueva hora (HH:MM)", font=FONT_BODY,
+                 bg=CARD, fg=MUTED).grid(row=0, column=2, sticky="w", padx=(0, 8))
+        self.e_hora = tk.Entry(campos, font=FONT_BODY, relief="solid", bd=1,
+                               bg="#F9FAFB", fg=TEXT, width=10)
+        self.e_hora.grid(row=0, column=3, sticky="ew")
+
+        btn_frame = tk.Frame(card, bg=CARD)
+        btn_frame.pack(pady=(16, 0))
+        styled_btn(btn_frame, "Reprogramar", self._reprogramar, color="#065F46", width=16).pack(side="left", padx=4)
+        styled_btn(btn_frame, "Cerrar", self.destroy, color="#6B7280", width=12).pack(side="left", padx=4)
+
+    def _reprogramar(self):
+        sel = self.listbox.curselection()
+        if not sel:
+            messagebox.showwarning("Aviso", "Selecciona una cita primero.", parent=self)
+            return
+        idx = sel[0]
+        nueva_fecha = self.e_fecha.get().strip()
+        nueva_hora = self.e_hora.get().strip()
+        if not nueva_fecha or not nueva_hora:
+            messagebox.showerror("Error", "Ingresa la nueva fecha y hora.", parent=self)
+            return
+        ok, msg = self.sistema.reprogramar_cita(self.doc, idx, nueva_fecha, nueva_hora)
+        if ok:
+            messagebox.showinfo("Éxito", msg, parent=self)
+            self.destroy()
+        else:
+            messagebox.showerror("Error", msg, parent=self)
+if __name__ == "__main__":
+    app = AppEPS()
+    app.mainloop()
+#interfaz usuario eps
