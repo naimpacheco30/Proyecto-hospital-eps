@@ -1,10 +1,18 @@
 const express = require('express');
 const cors = require('cors');
-const { validarCedula, validarFechaCitaNoPasada, verificarCitaDuplicada } = require('./logica/reglas-eps');
+const { validarCedula, validarFechaCitaNoPasada, verificarCitaDuplicada } = require('./reglas-eps');
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// Configuración estricta de CORS restringida al frontend de producción
+const corsOptions = {
+    origin: ['https://hospital-eps.netlify.app', 'http://cuc-bp-eq34-pacheco-sitio-2026.s3-website-us-east-1.amazonaws.com'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 
 // Simulación de base de datos en memoria para el reporte
 let citasBD = [
