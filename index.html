@@ -344,30 +344,3 @@
       }
       showView('view-reprogramar');
     }
-
-    function iniciarReprogramacion(idx) {
-      reprogramandoIdx = idx;
-      document.getElementById('form-reprogramar').classList.remove('hidden');
-    }
-
-    function guardarReprogramacion() {
-      if (reprogramandoIdx === null) return;
-      const nFecha = document.getElementById('rep-fecha').value;
-      const nHora = document.getElementById('rep-hora').value;
-
-      if (!nFecha || !nHora) return alert("Ingresa la nueva fecha y hora.");
-      if (!validarFecha(nFecha)) return alert("No puedes agendar en fechas pasadas.");
-
-      const userCitas = citas[currentDoc] || [];
-      const duplicada = userCitas.some((c, i) => i !== reprogramandoIdx && c.fecha === nFecha && c.hora === nHora);
-      if (duplicada) return alert("Ya tienes una cita en ese horario.");
-
-      userCitas[reprogramandoIdx].fecha = nFecha;
-      userCitas[reprogramandoIdx].hora = nHora;
-      saveState();
-      alert("Cita reprogramada correctamente.");
-      verReprogramar();
-    }
-  </script>
-</body>
-</html>
