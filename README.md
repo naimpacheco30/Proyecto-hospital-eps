@@ -35,3 +35,10 @@ Migramos el proyecto de Netlify a Amazon S3 para empezar a usar servicios de nub
 2. **Políticas de Ciclo de Vida y Optimización de Costos (`retencion-sitio`)**:
    - *Decisión*: Automatizar la transición de versiones actuales a *Standard-IA* a los 30 días y la purga permanente de versiones no vigentes a los 180 días.
    - *Justificación*: Optimiza los costos de almacenamiento en la nube a largo plazo al evitar la acumulación indefinida de respaldos y archivos históricos obsoletos.
+## ♻️ Refactorización de la API (Actividad 1)
+
+1. **Extracción de Funciones:** Se creó una función centralizada de respuesta `responder(res, codigo, datos)` para estandarizar el envío de estructuras JSON en todas las rutas.
+2. **Modularización del Cálculo:** La lógica matemática para el cálculo de notas y promedios se separó en su propia función independiente.
+3. **Constantes para Números Mágicos:** Se reemplazó el valor numérico directo por una constante descriptiva para la nota mínima aprobatoria (`3.0`).
+4. **Mejora en la Nomenclatura:** Se renombraron las variables abreviadas del código original (`s`, `d`, `t`, `p`) por identificadores descriptivos y legibles para facilitar el mantenimiento.
+5. **Mantenimiento del Contrato:** Se comprobó que todas las rutas (`/notas`, `/equipo`, etc.) devuelven exactamente la misma estructura de datos original.
