@@ -1,0 +1,22 @@
+{
+  "name": "logica",
+  "version": "1.0.0",
+  "description": "Back-end y reglas de negocio - EPS Vida Sana",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "vitest run"
+  },
+  "keywords": [],
+  "author": "Sebastian Perez",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0"
+  },
+  "devDependencies": {
+    "vitest": "^5.1.1"
+  }
+}

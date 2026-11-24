@@ -1,76 +1,52 @@
 # Sistema de Gestión de Citas - EPS Vida Sana
 
-Sistema integral y modular para la administración, registro, agendamiento y control de citas médicas multidisciplinares para usuarios de la EPS Vida Sana.
+Sistema para registrar y consultar citas médicas de la EPS Vida Sana. Proyecto de Buenas Prácticas de Desarrollo de Software, Universidad de la Costa (CUC), Equipo 34.
 
----
+## Integrantes
+- Sebastian Perez
+- Naim Pacheco
+- Samuel Dominguez
 
-## 🌐 Enlaces del Proyecto
+## Tecnologías
+- Node.js 18 y Express (back-end)
+- HTML, CSS y JavaScript (front-end)
+- Vitest (pruebas unitarias)
+- dotenv (variables de entorno)
+- AWS S3 (front-end) y AWS EC2 (back-end)
 
-* **Repositorio en GitHub:** [https://github.com/naimpacheco30/Proyecto-hospital-eps](https://github.com/naimpacheco30/Proyecto-hospital-eps)
-* **Despliegue en Producción (Netlify):** [https://hospital-eps.netlify.app/](https://hospital-eps.netlify.app/)
-
-## 👥 Integrantes del Equipo
-
-Integrantes: Sebastian Perez, Naim Pacheco y Samuel Dominguez
-
-## 📋 Funcionalidades Principales
-
-1. **Autenticación y Registro Seguro de Usuarios:** Control de acceso y creación de cuentas con validación numérica para documentos y contraseñas.
-
-
-2. **Agendamiento Multidisciplinar:** Programación de citas para 5 especialidades médicas (Médico general, Psicología, Odontología, Toma de muestras y Especialistas).
-
-
-3. **Manejo Dinámico de Formularios:** Adaptación de campos según el tipo de atención (selección de tipo de sesión para psicología, detalles de muestras o procedimientos odontológicos).
-
-
-4. **Validaciones de Seguridad:** Prevención de citas en horarios o fechas pasadas y bloqueo de citas duplicadas en el mismo rango horario.
-
-
-5. **Gestión Integral de Agenda:** Módulos interactivos para consultar el historial de citas activas, reprogramar fechas/horas y cancelar citas agendadas.
-
-
-6. **Persistencia de Datos:** Almacenamiento estructurado en JSON para entorno de escritorio y almacenamiento local para la plataforma web.
-
-
-
+## Instrucciones de ejecución local
 ```bash
-git clone https://github.com/naimpacheco30/Proyecto-hospital-eps.git
-
+git clone https://github.com/naimpacheco30/Proyecto-hospital-eps
+cd Proyecto-hospital-eps
+git checkout feature/logica-negocio-dry
+cd logica
+npm install
+cp env.example.txt .env     # edita los valores si es necesario
+node server.js
 ```
+El servidor queda en `http://localhost:3000`. Abre `index.html` en el navegador para usar el front-end.
 
-## ☁️ Despliegue en AWS y Almacenamiento S3
+Variables de entorno (`.env`):
+| Variable | Descripción |
+|---|---|
+| PORT | Puerto del servidor (por defecto 3000) |
+| FRONTEND_URL | URL del front-end permitida por CORS |
 
-| Integrante | URL del sitio | Bucket público | Bucket privado |
-| --- | --- | --- | --- |
-| Naim Pacheco | [http://cuc-bp-eq34-pacheco-sitio-2026.s3-website-us-east-1.amazonaws.com](http://cuc-bp-eq34-pacheco-sitio-2026.s3-website-us-east-1.amazonaws.com) | cuc-bp-eq34-pacheco-sitio-2026 | cuc-bp-eq34-pacheco-privado-2026 |
+## Endpoints
+| Método | Ruta | Descripción | Respuesta / Código |
+|---|---|---|---|
+| GET | /citas/resumen | Retorna el listado completo y contador de citas activas | JSON / 200 OK |
+| POST | /citas | Registra una nueva cita aplicando validaciones de negocio | JSON / 201 Created o 400 Bad Request |
 
-Migramos el proyecto a Amazon S3 para empezar a usar servicios de nube reales y tener mayor control de la infraestructura. Para lograr esto creamos dos buckets con propósitos distintos: el bucket público (al que le quitamos el bloqueo y le pusimos una política especial de lectura) es el que se encarga de mostrar la página web y permitir que cualquiera la visite en internet sin problemas; mientras que el bucket privado mantiene activado el bloqueo total para asegurarnos de que nadie por fuera pueda ver los archivos internos, protegiendo así los datos sensibles de la aplicación.
+## Pruebas
+Las reglas de negocio se prueban con Vitest (documento válido, documento con letras, nombre válido, fecha no pasada y cita duplicada).
+```bash
+cd logica
+npm test
+```
+Resultado esperado: 5 pruebas aprobadas. Auditoría de dependencias: `npm audit` (0 vulnerabilidades).
 
-## 📐 Registro de Decisiones de Arquitectura (ADR) - AWS S3
-
-1. **Versionado de Objetos en Bucket Público (`cuc-bp-eq34-pacheco-sitio-2026`)**:
-* *Decisión*: Habilitar el versionado en el bucket de producción.
-* *Justificación*: Permite proteger el sitio web frente a eliminaciones accidentales o sobreescrituras erróneas de archivos estáticos (como el `index.html`), facilitando la recuperación rápida mediante la eliminación de marcadores de eliminación.
-
-
-2. **Políticas de Ciclo de Vida y Optimización de Costos (`retencion-sitio`)**:
-* *Decisión*: Automatizar la transición de versiones actuales a *Standard-IA* a los 30 días y la purga permanente de versiones no vigentes a los 180 días.
-* *Justificación*: Optimiza los costos de almacenamiento en la nube a largo plazo al evitar la acumulación indefinida de respaldos y archivos históricos obsoletos.
-
-
-
-## ♻️ Refactorización de la API (Actividad 1)
-
-1. **Extracción de Funciones:** Se creó una función centralizada de respuesta `responder(res, codigo, datos)` para estandarizar el envío de estructuras JSON en todas las rutas.
-2. **Modularización del Cálculo:** La lógica matemática para el cálculo de notas y promedios se separó en su propia función independiente.
-3. **Constantes para Números Mágicos:** Se reemplazó el valor numérico directo por una constante descriptiva para la nota mínima aprobatoria (`3.0`).
-4. **Mejora en la Nomenclatura:** Se renombraron las variables abreviadas del código original (`s`, `d`, `t`, `p`) por identificadores descriptivos y legibles para facilitar el mantenimiento.
-5. **Mantenimiento del Contrato:** Se comprobó que todas las rutas (`/notas`, `/equipo`, etc.) devuelven exactamente la misma estructura de datos original.
-
-## 🛠️ Despliegue de Backend en AWS EC2 y Calidad de Código (Tercer Corte - B.3)
-
-1. **Infraestructura Cloud Backend:** Despliegue de la API Node.js/Express en una instancia AWS EC2 (`api-eps-vida-sana`, IP pública `52.90.163.67`) con configuración del Grupo de Seguridad (`launch-wizard-1`) para habilitar el tráfico público en el puerto 3000.
-2. **Capas y Reglas de Negocio:** Separación modular de las validaciones de negocio en el directorio `logica/` (archivos como `reglas-eps.js`), asegurando funciones puras independientes de los objetos `req` y `res` de Express.
-3. **Pruebas Unitarias (`npm test`):** Implementación de pruebas automatizadas con Jest cubriendo validaciones de cédula, fechas límite y casos extremos de duplicidad de citas con resultados satisfactorios.
-4. **Seguridad y Control de Dependencias:** Configuración de middleware CORS estricto y ejecución de auditorías de seguridad (`npm audit`) para mitigar vulnerabilidades en el entorno de producción.
+## Despliegue
+- **Front-end (AWS S3):** http://cuc-bp-eq34-perez-sitio-2026.s3-website-us-east-1.amazonaws.com
+- **Back-end (AWS EC2):** instancia con Node.js, accesible por el puerto 3000. CORS restringido al dominio del front-end mediante `FRONTEND_URL`.
+- Los secretos no se suben al repositorio: se usa `env.example.txt` y `.gitignore`.
